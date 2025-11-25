@@ -63,7 +63,7 @@ const Landing = () => {
         <div className="container mx-auto px-4 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
             Sistem Pelaporan Lingkungan
-            <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pb-1">
               RT/RW Digital
             </span>
           </h1>
