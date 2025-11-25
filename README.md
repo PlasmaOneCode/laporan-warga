@@ -1,73 +1,225 @@
-# Welcome to your Lovable project
+# Sistem Pelaporan Lingkungan RT/RW
 
-## Project info
+Platform digital untuk melaporkan dan mengelola masalah lingkungan di sekitar RT/RW. Dibangun dengan React + Vite, Tailwind CSS, dan TypeScript.
 
-**URL**: https://lovable.dev/projects/9d539134-c7f9-4a0e-ba59-68350149f7e9
+## 🚀 Fitur Utama
 
-## How can I edit this code?
+- **Autentikasi JWT**: Login dan Register dengan token-based authentication
+- **Manajemen Laporan**: CRUD lengkap untuk laporan lingkungan
+- **Upload Gambar**: Multi-image upload dengan preview (max 4 gambar, 5MB per file)
+- **Filter & Search**: Pencarian dan filter berdasarkan kategori dan status
+- **Dashboard Admin**: Statistik dan manajemen laporan untuk admin
+- **Responsive Design**: Mobile-first, works on all devices
+- **Real-time Feedback**: Toast notifications untuk setiap aksi
 
-There are several ways of editing your application.
+## 📦 Teknologi
 
-**Use Lovable**
+- **React 18** with Vite
+- **TypeScript**
+- **Tailwind CSS** untuk styling
+- **Shadcn/ui** untuk komponen UI
+- **Axios** untuk HTTP requests dengan interceptor
+- **React Router** untuk navigation
+- **Context API** untuk state management
+- **date-fns** untuk format tanggal
+- **React Leaflet** (optional) untuk integrasi peta
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9d539134-c7f9-4a0e-ba59-68350149f7e9) and start prompting.
+## 🛠️ Setup & Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 16+ dan npm/yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Langkah-langkah
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone repository**
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
 git clone <YOUR_GIT_URL>
+cd <PROJECT_NAME>
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Install dependencies**
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. **Setup environment variables**
+
+Buat file `.env` di root project:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+Sesuaikan `VITE_API_BASE_URL` dengan base URL backend API Anda.
+
+4. **Run development server**
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Aplikasi akan berjalan di `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📁 Struktur Folder
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/
+│   ├── Layout/
+│   │   ├── Navbar.tsx
+│   │   └── ProtectedRoute.tsx
+│   ├── Common/
+│   │   ├── StatusBadge.tsx
+│   │   └── CategoryBadge.tsx
+│   └── ui/              # Shadcn UI components
+├── contexts/
+│   └── AuthContext.tsx  # Authentication context
+├── lib/
+│   ├── axios.ts         # Axios instance dengan interceptor
+│   └── utils.ts
+├── pages/
+│   ├── auth/
+│   │   ├── Login.tsx
+│   │   └── Register.tsx
+│   ├── reports/
+│   │   ├── NewReport.tsx
+│   │   └── ReportDetail.tsx
+│   ├── admin/
+│   │   └── AdminDashboard.tsx
+│   ├── Landing.tsx
+│   ├── Dashboard.tsx
+│   └── NotFound.tsx
+└── App.tsx
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔌 API Endpoints (Backend Contract)
 
-## What technologies are used for this project?
+Aplikasi ini mengharapkan backend REST API dengan endpoint berikut:
 
-This project is built with:
+### Authentication
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- `POST /api/auth/register` - Register user baru
+- `POST /api/auth/login` - Login user
 
-## How can I deploy this project?
+### Reports
 
-Simply open [Lovable](https://lovable.dev/projects/9d539134-c7f9-4a0e-ba59-68350149f7e9) and click on Share -> Publish.
+- `GET /api/reports` - Get list laporan (support query params: search, category, status, page, limit)
+- `GET /api/reports/stats` - Get statistik laporan
+- `GET /api/reports/:id` - Get detail laporan
+- `POST /api/reports` - Create laporan baru (multipart/form-data)
+- `PUT /api/reports/:id` - Update laporan
+- `PATCH /api/reports/:id/status` - Update status laporan
+- `DELETE /api/reports/:id` - Delete laporan
 
-## Can I connect a custom domain to my Lovable project?
+Detail request/response format ada di dokumentasi backend.
 
-Yes, you can!
+## 👤 User Roles
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- **User**: Dapat membuat, melihat, edit, dan delete laporan sendiri
+- **Admin**: Semua akses user + dapat mengelola semua laporan dan melihat dashboard admin
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🎨 Design System
+
+Aplikasi menggunakan design system berbasis semantic tokens:
+
+- **Primary**: Hijau environmental theme
+- **Secondary**: Biru untuk trust dan civic duty
+- **Accent**: Orange untuk alerts/urgency
+- **Success/Warning/Info**: Status indicators
+
+Semua warna didefinisikan dalam `src/index.css` menggunakan HSL values dan diakses via Tailwind CSS.
+
+## 🔐 Authentication Flow
+
+1. User login/register → Backend returns JWT token
+2. Token disimpan di `localStorage`
+3. Axios interceptor otomatis menambahkan `Authorization: Bearer <token>` header
+4. Jika 401 Unauthorized → Auto logout dan redirect ke login
+
+## 📸 Upload Gambar
+
+### Client-side Validation
+
+- Tipe file: JPG, JPEG, PNG only
+- Size: Max 5MB per file
+- Jumlah: Min 1, Max 4 gambar
+- Preview sebelum upload
+
+### Upload Format
+
+Menggunakan `FormData` dengan field `images` (multiple files).
+
+## 🚢 Deployment
+
+### Build untuk production
+
+```bash
+npm run build
+```
+
+Output akan ada di folder `dist/`.
+
+### Deploy ke Vercel (contoh)
+
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run: `vercel`
+3. Follow the prompts
+
+Jangan lupa set environment variable `VITE_API_BASE_URL` di dashboard Vercel.
+
+## 🐛 Troubleshooting
+
+### CORS Error
+
+Pastikan backend Anda mengizinkan CORS dari domain frontend.
+
+### 401 Unauthorized
+
+- Cek token di localStorage
+- Pastikan backend menerima format `Authorization: Bearer <token>`
+- Cek apakah token sudah expired
+
+### Image Upload Gagal
+
+- Cek ukuran file (max 5MB)
+- Pastikan backend mendukung multipart/form-data
+- Cek network tab di browser untuk detail error
+
+## 📝 Test Credentials
+
+Untuk testing, gunakan credentials berikut (jika backend sudah di-seed):
+
+```
+Email: admin@test.com
+Password: admin123
+Role: admin
+
+Email: user@test.com
+Password: user123
+Role: user
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 📧 Contact
+
+Untuk pertanyaan atau issue, silakan buka GitHub Issues atau hubungi maintainer.
+
+---
+
+**Happy Coding! 🚀**
