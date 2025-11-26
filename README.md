@@ -2,6 +2,8 @@
 
 Platform digital untuk melaporkan dan mengelola masalah lingkungan di sekitar RT/RW. Dibangun dengan React + Vite, Tailwind CSS, dan TypeScript.
 
+Note: Frontend project sekarang berada di folder `frontend/` dan backend berada di `backend/`.
+
 ## 🚀 Fitur Utama
 
 - **Autentikasi JWT**: Login dan Register dengan token-based authentication
@@ -35,39 +37,93 @@ Platform digital untuk melaporkan dan mengelola masalah lingkungan di sekitar RT
 1. **Clone repository**
 
 ```bash
-git clone <YOUR_GIT_URL>
-cd <PROJECT_NAME>
+git clone https://github.com/PlasmaOneCode/laporan-warga
+cd laporan-warga
 ```
 
 2. **Install dependencies**
 
+Project ini sekarang menggunakan struktur terpisah untuk frontend dan backend (folder `frontend/` dan `backend/`). Install dependencies masing-masing subproject seperti berikut:
+
 ```bash
+# Backend
+cd backend
 npm install
+
+# Frontend
+cd ../frontend
+npm install
+Optional: Jika backend menyediakan seed, jalankan seed untuk membuat akun testing dan data contoh:
+
+```bash
+cd backend
+npm run seed
+```
+
+```
+
+Jika Anda ingin menjalankan keduanya dari root dengan satu perintah, Anda bisa menambahkan skrip `workspaces` (opsional):
+
+```json
+// contoh isi `package.json` root (opsional untuk monorepo)
+{
+	"private": true,
+	"workspaces": ["frontend", "backend"],
+	"scripts": {
+		"dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\""
+	}
+}
 ```
 
 3. **Setup environment variables**
 
-Buat file `.env` di root project:
+Berikut adalah lokasi environment variables yang dipakai oleh setiap subproject:
+
+- Backend: buat file `backend/.env` dengan variabel yang dibutuhkan (contoh):
+
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/laporan_warga
+JWT_SECRET=supersecretkey
+```
+
+- Frontend: buat file `frontend/.env` (prefix `VITE_` dibutuhkan untuk Vite):
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-Sesuaikan `VITE_API_BASE_URL` dengan base URL backend API Anda.
+Catatan: Vite hanya membaca env variables yang diawali `VITE_`.
 
 4. **Run development server**
 
+Jalankan backend dan frontend secara terpisah (membutuhkan dua terminal):
+
 ```bash
+# Terminal 1: backend
+cd backend
+npm run dev
+
+# Terminal 2: frontend
+cd frontend
 npm run dev
 ```
 
-Aplikasi akan berjalan di `http://localhost:8080`
+Frontend biasanya berjalan di `http://localhost:5173` (default Vite). Jika Anda menambahkan skrip monorepo di root (opsional), jalankan saja `npm run dev` di root.
 
 ## 📁 Struktur Folder
 
 ```
-src/
-├── components/
+frontend/
+├── index.html
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── postcss.config.js
+├── tailwind.config.ts
+├── public/
+└── src/
+	├── components/
 │   ├── Layout/
 │   │   ├── Navbar.tsx
 │   │   └── ProtectedRoute.tsx
@@ -92,7 +148,16 @@ src/
 │   ├── Landing.tsx
 │   ├── Dashboard.tsx
 │   └── NotFound.tsx
-└── App.tsx
+	└── App.tsx
+backend/
+├── package.json
+├── server.js
+├── controllers/
+├── models/
+├── middleware/
+├── routes/
+├── uploads/
+└── seed.js
 ```
 
 ## 🔌 API Endpoints (Backend Contract)
@@ -130,7 +195,7 @@ Aplikasi menggunakan design system berbasis semantic tokens:
 - **Accent**: Orange untuk alerts/urgency
 - **Success/Warning/Info**: Status indicators
 
-Semua warna didefinisikan dalam `src/index.css` menggunakan HSL values dan diakses via Tailwind CSS.
+Semua warna didefinisikan dalam `frontend/src/index.css` menggunakan HSL values dan diakses via Tailwind CSS.
 
 ## 🔐 Authentication Flow
 
@@ -148,6 +213,8 @@ Semua warna didefinisikan dalam `src/index.css` menggunakan HSL values dan diaks
 - Jumlah: Min 1, Max 4 gambar
 - Preview sebelum upload
 
+Note: File gambar tersimpan di folder `backend/uploads/` dan dapat diakses melalui URL `http://localhost:<BACKEND_PORT>/uploads/<filename>` (mis. `http://localhost:5000/uploads/example.jpg`).
+
 ### Upload Format
 
 Menggunakan `FormData` dengan field `images` (multiple files).
@@ -156,11 +223,16 @@ Menggunakan `FormData` dengan field `images` (multiple files).
 
 ### Build untuk production
 
+Build untuk frontend (Vite):
+
 ```bash
+cd frontend
 npm run build
 ```
 
-Output akan ada di folder `dist/`.
+Output frontend akan berada di `frontend/dist/`.
+
+Backend: backend adalah Node/Express — tidak butuh step build bila menjalankan langsung dengan Node/Nodemon.
 
 ### Deploy ke Vercel (contoh)
 
@@ -168,7 +240,71 @@ Output akan ada di folder `dist/`.
 2. Run: `vercel`
 3. Follow the prompts
 
-Jangan lupa set environment variable `VITE_API_BASE_URL` di dashboard Vercel.
+Jangan lupa set environment variable `VITE_API_BASE_URL` di dashboard Vercel (contoh `https://api.domain.com/api`). Jika Anda mer-deploy backend dan frontend terpisah, pastikan Base URL diarahkan ke backend yang sudah dideploy.
+
+Note: Kalau Anda mendeploy frontend saja (mis. **Vercel**), gunakan `frontend/dist/` sebagai build output atau atur project root ke `frontend/` di Vercel settings.
+
+## Lockfiles & Package Manager
+
+- `frontend/package-lock.json` berada di folder `frontend` dan `backend/package-lock.json` di `backend` — ini adalah lockfile tiap subproject.
+- Root `package-lock.json` hanya diperlukan jika Anda ingin menyimpan konfigurasi root-level (opt-in). Jika menggunakan `npm workspaces`, Anda dapat menyimpan lockfile di root dan gunakan `workspaces` di `package.json` root.
+- `bun.lockb` hanya relevan jika menggunakan `bun`. Jika Anda tidak menggunakan bun, Anda dapat menghapus `bun.lockb` untuk menghindari kebingungan.
+
+## 🐛 Troubleshooting (Tambahan)
+
+### `Cannot find module '@/...'` atau error `paths`/alias
+
+- Pastikan `vite.config.ts` di `frontend/` mengatur alias `@` ke `src`:
+
+```ts
+import path from 'path'
+// ...
+resolve: {
+	alias: { '@': path.resolve(__dirname, 'src') }
+}
+```
+
+- Pastikan `frontend/tsconfig.json` memetakan `@/*` ke `src/*`:
+
+```json
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": { "@/*": ["src/*"] }
+	}
+}
+```
+
+### `@tailwind` unknown rule / PostCSS errors
+
+- Pastikan `postcss.config.js` dan `tailwind.config.ts` berada di `frontend/`.
+- Install dependency Tailwind / PostCSS di `frontend` (`cd frontend && npm install`) dan jalankan `npm run dev` di dalam folder itu.
+
+### `vite` not found or ERESOLVE peer dependency errors
+
+- Kalau `vite` tidak ditemukan, jalankan `cd frontend && npm install` agar devDeps di frontend terinstal.
+- Jika Anda menemui masalah `ERESOLVE` atau peer dependency conflict (contoh: `react-leaflet` membutuhkan React 19), hapus package bermasalah dari `frontend/package.json` jika tidak dipakai, atau upgrade React jika perlu.
+
+
+Jika masih menemui error, jalankan `npm install` di subproject masing-masing, lalu `npm run dev` di subproject terkait.
+
+### Tips: TypeScript & path alias (`@`)
+
+- Jika frontend dipindah ke `frontend/`, buat `frontend/tsconfig.json` yang me-extend root `tsconfig.json` (jika ada) atau sediakan `paths` untuk `@/*` pointing to `src/*`.
+- Contoh `frontend/tsconfig.json`:
+
+```json
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": { "@/*": ["src/*"] }
+	},
+	"include": ["src"]
+}
+```
+
+Ini membuat import alias `@/` bekerja dengan baik di editor dan build.
 
 ## 🐛 Troubleshooting
 
@@ -187,6 +323,20 @@ Pastikan backend Anda mengizinkan CORS dari domain frontend.
 - Cek ukuran file (max 5MB)
 - Pastikan backend mendukung multipart/form-data
 - Cek network tab di browser untuk detail error
+
+### MongoDB Connection (ECONNREFUSED)
+
+- Jika backend Anda gagal connect ke MongoDB (`ECONNREFUSED`), pastikan MongoDB sudah berjalan di mesin lokal atau gunakan Docker. Contoh perintah Docker:
+
+```bash
+docker run -d -p 27017:27017 --name mongo mongo:6.0
+```
+
+Atau jalankan layanan MongoDB pada Windows (jika terinstal sebagai service):
+
+```powershell
+net start MongoDB
+```
 
 ## 📝 Test Credentials
 
