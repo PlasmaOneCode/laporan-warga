@@ -29,8 +29,8 @@ const Dashboard = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-  const [status, setStatus] = useState('');
+  const [category, setCategory] = useState('all');
+  const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 12;
@@ -48,8 +48,8 @@ const Dashboard = () => {
       });
       
       if (search) params.append('search', search);
-      if (category) params.append('category', category);
-      if (status) params.append('status', status);
+      if (category && category !== 'all') params.append('category', category);
+      if (status && status !== 'all') params.append('status', status);
 
       const response = await axiosInstance.get(`/reports?${params}`);
       setReports(response.data.data || []);
@@ -63,8 +63,8 @@ const Dashboard = () => {
 
   const handleReset = () => {
     setSearch('');
-    setCategory('');
-    setStatus('');
+    setCategory('all');
+    setStatus('all');
     setPage(1);
   };
 
@@ -114,7 +114,7 @@ const Dashboard = () => {
                   <SelectValue placeholder="Kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Semua Kategori</SelectItem>
+                  <SelectItem value="all">Semua Kategori</SelectItem>
                   <SelectItem value="lampu_mati">Lampu Mati</SelectItem>
                   <SelectItem value="jalan_berlubang">Jalan Berlubang</SelectItem>
                   <SelectItem value="sampah">Sampah</SelectItem>
@@ -127,7 +127,7 @@ const Dashboard = () => {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Semua Status</SelectItem>
+                  <SelectItem value="all">Semua Status</SelectItem>
                   <SelectItem value="open">Terbuka</SelectItem>
                   <SelectItem value="in_progress">Dalam Proses</SelectItem>
                   <SelectItem value="done">Selesai</SelectItem>

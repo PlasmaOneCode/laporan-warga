@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Layout/Navbar';
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import StatusBadge from '@/components/Common/StatusBadge';
 import CategoryBadge from '@/components/Common/CategoryBadge';
 import { MapPin, Calendar, User, Phone, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import axiosInstance from '@/lib/axios';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -52,10 +54,54 @@ const ReportDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const leafletMapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     fetchReport();
   }, [id]);
+
+  useEffect(() => {
+    if (!report?.lat || !report?.lng) return;
+    // Set up leaflet default icon URLs
+    try {
+      // Use CDN-hosted icon images to avoid import issues
+      // @ts-ignore
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      });
+    } catch (err) {
+      console.warn('Leaflet icon setup failed', err);
+    }
+
+    if (mapRef.current && !leafletMapRef.current) {
+      const map = L.map(mapRef.current).setView([report.lat, report.lng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+      const marker = L.marker([report.lat, report.lng]).addTo(map);
+      leafletMapRef.current = map;
+      markerRef.current = marker;
+    } else if (leafletMapRef.current) {
+      leafletMapRef.current.setView([report.lat, report.lng], 13);
+      if (markerRef.current) {
+        markerRef.current.setLatLng([report.lat, report.lng]);
+      } else {
+        markerRef.current = L.marker([report.lat, report.lng]).addTo(leafletMapRef.current);
+      }
+    }
+
+    return () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
+  }, [report?.lat, report?.lng]);
 
   const fetchReport = async () => {
     try {
@@ -240,13 +286,8 @@ const ReportDetail = () => {
                     <CardTitle>Lokasi di Peta</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
-                      <p className="text-muted-foreground">
-                        Peta: {report.lat}, {report.lng}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        (Integrasi Leaflet dapat ditambahkan di sini)
-                      </p>
+                    <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                      <div ref={mapRef} className="h-full w-full" style={{ minHeight: 240 }} />
                     </div>
                   </CardContent>
                 </Card>

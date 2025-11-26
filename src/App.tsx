@@ -12,6 +12,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/Dashboard";
 import NewReport from "./pages/reports/NewReport";
+import EditReport from "./pages/reports/EditReport";
 import ReportDetail from "./pages/reports/ReportDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -53,6 +54,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ReportDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditReport />
                 </ProtectedRoute>
               }
             />
