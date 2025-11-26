@@ -4,6 +4,69 @@ Platform digital untuk melaporkan dan mengelola masalah lingkungan di sekitar RT
 
 Note: Frontend project sekarang berada di folder `frontend/` dan backend berada di `backend/`.
 
+## 🧭 Problem Statement (Masalah yang Diselesaikan)
+
+Di banyak lingkungan RT/RW, warga sering menemui masalah lokal seperti lampu jalan mati, jalan berlubang, dan sampah yang menumpuk, namun belum ada saluran pelaporan yang mudah, terpusat, dan terdokumentasi. Informasi yang masuk seringkali tidak terstruktur, tidak ada cara melacak status perbaikan, dan sulit bagi pengurus RT/RW atau pihak berwenang untuk memantau dan merespons laporan secara cepat.
+
+Masalah yang biasanya muncul:
+- Kurangnya saluran yang mudah untuk mengirim laporan dengan detail dan bukti (foto)
+- Tidak ada mekanisme tracking/status untuk laporan
+- Kesulitan manajemen data dan statistik bagi admin/dinas
+- Tidak ada sistem autentikasi untuk membatasi akses update/edit hanya oleh pemilik atau admin
+
+## 💡 Solution Overview (Solusi yang Dibuat)
+
+Proyek ini membuat sebuah platform pelaporan lingkungan RT/RW yang menyediakan:
+- Form laporan yang mendukung multi-image upload (preview sebelum submit)
+- Autentikasi JWT untuk user & admin (role-based access)
+- Halaman dashboard dan statistik untuk admin
+- Fitur CRUD untuk laporan (create, read, update, delete)
+- Penyimpanan gambar melalui upload server (dan rekomendasi migrasi ke cloud storage untuk production)
+- Filter, pencarian, dan kategori laporan untuk mempermudah manajemen
+- Integrasi peta untuk menandakan lokasi laporan (opsional jika user mengisi latitude/longitude)
+
+Arsitektur singkat:
+- Frontend: React + Vite + TypeScript + Tailwind — UI, forms, file preview, routing
+- Backend: Node.js + Express + MongoDB (Mongoose) — REST API, auth, upload handling
+- Penyimpanan gambar: local folder `backend/uploads/` (dev) dan rekomendasi Cloudinary/S3 untuk production
+
+Solusi ini memudahkan warga melaporkan permasalahan, dan memudahkan pengurus RT/RW untuk melacak serta menindaklanjuti laporan tersebut.
+
+## ⚡ Quickstart (Ringkasan Cepat Menjalankan Project)
+
+Langkah singkat untuk menjalankan aplikasi pada mesin development: pastikan Node.js dan npm sudah terinstal.
+
+1) Backend (jalankan di terminal 1):
+
+```bash
+cd backend
+cp .env.example .env # membuat .env lokal (atau set environment variables)
+npm install
+npm run seed # optional, isi data contoh
+npm run dev
+```
+
+2) Frontend (jalankan di terminal 2):
+
+```bash
+cd frontend
+cp .env.example .env # jika ada
+npm install
+npm run dev
+```
+
+3) Akses:
+- Frontend: http://localhost:8080 atau LAN address (lihat output Vite)
+- Backend API: http://localhost:5000/api
+
+Alternatif (tanpa menginstall MongoDB lokal): jalankan MongoDB via Docker:
+
+```bash
+docker run -d -p 27017:27017 --name mongo mongo:6.0
+```
+
+Atau gunakan MongoDB Atlas — update `backend/.env` `MONGODB_URI` dengan connection string Atlas.
+
 ## 🚀 Fitur Utama
 
 - **Autentikasi JWT**: Login dan Register dengan token-based authentication
