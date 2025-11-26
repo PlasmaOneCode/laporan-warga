@@ -1,17 +1,18 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export const connectDB = async () => {
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/rtrw_reports';
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // new URL parser and unified topology are now default
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
     });
-
-    console.log(`MongoDB connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
+    console.log('MongoDB connected:', mongoose.connection.host);
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message || err);
     process.exit(1);
   }
 };
+
+export default connectDB;
